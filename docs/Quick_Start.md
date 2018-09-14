@@ -4,13 +4,13 @@
 ## Running with Docker
 
 ```sh
-docker run -p 6379:6379 redislabs/redisearch:latest
+docker run -p 6379:6379 goodform/redisearch:latest
 ```
 
 ## Building and running from source
 
 ```sh
-git clone https://github.com/RedisLabsModules/RediSearch.git
+git clone https://github.com/goodform/RediSearch.git
 cd RediSearch/src
 make all
 

@@ -1,8 +1,8 @@
-display_name: redisearch-oss
-author: RedisLabs
-email: dvir@redislabs.com
-description: High performance search index on top of redis
-homepage: http://redisearch.io
+display_name: RediSearch
+author: goodform
+email: freeandopenredismodules@gmail.com
+description: High performance search index for Redis
+homepage: https://github.com/goodform/RediSearch
 license: AGPLv3
 command_line_args: ""
 min_redis_version: "4.0"

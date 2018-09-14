@@ -30,9 +30,9 @@ print_version:
 	$(MAKE) -C ./src print_version
 
 docker: distclean print_version
-	docker build . -t redislabs/redisearch
+	docker build . -t goodform/redisearch
 
 docker_push: docker
-	docker push redislabs/redisearch:latest
-	docker tag redislabs/redisearch:latest redislabs/redisearch:`./src/print_version`
-	docker push redislabs/redisearch:`./src/print_version`
+	docker push goodform/redisearch:latest
+	docker tag goodform/redisearch:latest goodform/redisearch:`./src/print_version`
+	docker push goodform/redisearch:`./src/print_version`

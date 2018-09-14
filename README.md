@@ -1,13 +1,13 @@
-[![CircleCI](https://circleci.com/gh/RedisLabsModules/RediSearch/tree/master.svg?style=svg)](https://circleci.com/gh/RedisLabsModules/RediSearch/tree/master)
+[![CircleCI](https://circleci.com/gh/goodform/RediSearch/tree/master.svg?style=svg)](https://circleci.com/gh/goodform/RediSearch/tree/master)
 
 # RediSearch
 
-### Full-Text search over Redis by RedisLabs
+### Full-Text search over Redis
 ![logo.png](docs/logo.png)
 
 ### See Full Documentation at [http://redisearch.io](http://redisearch.io)
 
-### Latest Release: [1.2.0](https://github.com/RedisLabsModules/RediSearch/releases)
+### Latest Release: [1.2.0](https://github.com/goodform/RediSearch/releases)
 
 # Overview
 
@@ -22,18 +22,16 @@ that are not possible or efficient with traditional Redis search approaches.
 
 # Docker Image
 
-[https://hub.docker.com/r/redislabs/redisearch/](https://hub.docker.com/r/redislabs/redisearch/)
+[https://hub.docker.com/g/goodform/redisearch/](https://hub.docker.com/g/goodform/redisearch/)
 
 ```sh
-$ docker run -p 6379:6379 redislabs/redisearch:latest
+$ docker run -p 6379:6379 goodform/redisearch:latest
 ```
 # Mailing List / Forum
 
 Got questions? Feel free to ask at the [RediSearch mailing list](https://groups.google.com/forum/#!forum/redisearch).
 
 # Client Libraries
-
-Official (Redis Labs) and community Clients:
 
 | Language | Library | Author | License | Comments |
 |---|---|---|---|---|
@@ -66,10 +64,6 @@ Official (Redis Labs) and community Clients:
 * Automatically index existing HASH keys as documents.
 * Document deletion.
 * Sortable properties (i.e. sorting users by age or name).
-
-## Cluster Support
-
-RediSearch has a distributed cluster version that can scale to billions of documents and hundreds of servers. However, at the moment it is only available as part of Redis Labs Enterprise. See the [Redis Labs Website](https://redislabs.com/modules/redisearch/) for more info and contact information.
 
 ### Not *yet* supported:
 

@@ -1,6 +1,6 @@
 site_name: RediSearch Documentation
 site_url: http://redisearch.io
-repo_url: https://github.com/RedisLabsModules/RediSearch
+repo_url: https://github.com/goodform/RediSearch
 
 
 google_analytics:
