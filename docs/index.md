@@ -2,12 +2,12 @@
 
 # RediSearch - Redis Powered Search Engine
 
-RediSearch is a an open-source Full-Text and Secondary Index engine over Redis, developed by [Redis Labs](http://redislabs.com). 
+RediSearch is a an open-source Full-Text and Secondary Index engine over Redis.
 
 !!! note "Quick Links:"
-    * [Source Code at GitHub](https://github.com/RedisLabsModules/RediSearch).
-    * [Latest Release: 1.2.0](https://github.com/RedisLabsModules/RediSearch/releases)
-    * [Docker Image: redislabs/redisearch](https://hub.docker.com/r/redislabs/redisearch/)
+    * [Source Code at GitHub](https://github.com/goodform/RediSearch).
+    * [Latest Release: 1.2.0](https://github.com/goodform/RediSearch/releases)
+    * [Docker Image: goodform/redisearch](https://hub.docker.com/g/goodform/redisearch/)
     * [Quick Start Guide](/Quick_Start)
     * [Mailing list / Forum](https://groups.google.com/forum/#!forum/redisearch)
 
@@ -28,10 +28,6 @@ that are not possible or efficient with traditional Redis search approaches.
 
 Official and community client libraries in Python, Java, JavaScript, Ruby, Go, C#, and PHP. 
 See [Clients Page](/Clients)
-
-## Cluster Support and Commercial Version
-
-RediSearch has a distributed cluster version that can scale to billions of documents and hundreds of servers. However, it is only available as part of Redis Labs Enterprise. We also offer official commercial support for RediSearch. See the [Redis Labs Website](https://redislabs.com/redis-enterprise/technology/redis-search/#sds) for more info and contact information. 
 
 ## Primary Features:
 
