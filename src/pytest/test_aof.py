@@ -1,7 +1,8 @@
 from rmtest import BaseModuleTestCase
+from hotels import hotels
+from redis._compat import (long, xrange)
 import redis
 import unittest
-from hotels import hotels
 import random
 import time
 
@@ -27,7 +28,7 @@ class AofTestCase(BaseModuleTestCase):
         for x in range(1, 10):
             self.assertCmdOk('ft.add', 'idx', 'doc{}'.format(x), 1.0 / x, 'fields',
                              'field1', 'myText{}'.format(x), 'field2', 20 * x)
-        exp = [9L, 'doc1', ['field1', 'myText1', 'field2', '20'], 'doc2', ['field1', 'myText2', 'field2', '40'], 'doc3', ['field1', 'myText3', 'field2', '60'], 'doc4', ['field1', 'myText4', 'field2', '80'], 'doc5', ['field1',
+        exp = [long(9), 'doc1', ['field1', 'myText1', 'field2', '20'], 'doc2', ['field1', 'myText2', 'field2', '40'], 'doc3', ['field1', 'myText3', 'field2', '60'], 'doc4', ['field1', 'myText4', 'field2', '80'], 'doc5', ['field1',
                                                                                                                                                                                                                         'myText5', 'field2', '100'], 'doc6', ['field1', 'myText6', 'field2', '120'], 'doc7', ['field1', 'myText7', 'field2', '140'], 'doc8', ['field1', 'myText8', 'field2', '160'], 'doc9', ['field1', 'myText9', 'field2', '180']]
         reloadfn()
         ret = self.cmd('ft.search', 'idx', 'myt*')
@@ -98,7 +99,7 @@ class AofTestCase(BaseModuleTestCase):
         self.cmd('FT.ADD', 'idx', '2', '1', 'fields', 'foo', 'B', 'bar', '1')
         res = self.cmd('FT.SEARCH', 'idx', '@bar:{1}', 'SORTBY', 'foo', 'ASC',
                        'RETURN', '1', 'foo', 'WITHSORTKEYS')
-        self.assertEqual([2L, '1', '$a', ['foo', 'A'],
+        self.assertEqual([long(2), '1', '$a', ['foo', 'A'],
                           '2', '$b', ['foo', 'B']], res)
 
 def to_dict(r):

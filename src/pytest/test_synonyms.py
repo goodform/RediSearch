@@ -2,9 +2,9 @@ from rmtest import BaseModuleTestCase
 import redis
 import unittest
 from hotels import hotels
+from redis._compat import long
 import random
 import time
-
 
 class SynonymsTestCase(BaseModuleTestCase):
 
@@ -20,7 +20,7 @@ class SynonymsTestCase(BaseModuleTestCase):
                                             'body', 'this is a test'))
 
             res = r.execute_command('ft.search', 'idx', 'child', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [1L, 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
 
     def testTermOnTwoSynonymsGroup(self):
         with self.redis() as r:
@@ -35,9 +35,9 @@ class SynonymsTestCase(BaseModuleTestCase):
                                             'body', 'this is a test'))
 
             res = r.execute_command('ft.search', 'idx', 'child', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [1L, 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
             res = r.execute_command('ft.search', 'idx', 'offspring', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [1L, 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
 
     def testSynonymGroupWithThreeSynonyms(self):
         with self.redis() as r:
@@ -51,9 +51,9 @@ class SynonymsTestCase(BaseModuleTestCase):
                                             'body', 'this is a test'))
 
             res = r.execute_command('ft.search', 'idx', 'child', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [1L, 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
             res = r.execute_command('ft.search', 'idx', 'offspring', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [1L, 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
 
     def testSynonymWithMultipleDocs(self):
         with self.redis() as r:
@@ -71,7 +71,7 @@ class SynonymsTestCase(BaseModuleTestCase):
                                             'body', 'the child sister'))
 
             res = r.execute_command('ft.search', 'idx', 'offspring', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [2L, 'doc2', ['title', 'she is a girl', 'body', 'the child sister'], 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [long(2), 'doc2', ['title', 'she is a girl', 'body', 'the child sister'], 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
 
     def testSynonymUpdate(self):
         with self.redis() as r:
@@ -91,7 +91,7 @@ class SynonymsTestCase(BaseModuleTestCase):
 
             res = r.execute_command('ft.search', 'idx', 'child', 'EXPANDER', 'SYNONYM')
             # synonyms are applied from the moment they were added, previuse docs are not reindexed
-            self.assertEqual(res, [1L, 'doc2', ['title', 'he is another baby', 'body', 'another test']])
+            self.assertEqual(res, [long(1), 'doc2', ['title', 'he is another baby', 'body', 'another test']])
 
     def testSynonymDump(self):
         with self.redis() as r:
@@ -101,7 +101,7 @@ class SynonymsTestCase(BaseModuleTestCase):
             self.assertEqual(r.execute_command('ft.synadd', 'idx', 'boy', 'child', 'offspring'), 0)
             self.assertEqual(r.execute_command('ft.synadd', 'idx', 'baby', 'child'), 1)
             self.assertEqual(r.execute_command('ft.synadd', 'idx', 'tree', 'wood'), 2)
-            self.assertEqual(r.execute_command('ft.syndump', 'idx'), ['baby', [1L], 'offspring', [0L], 'wood', [2L], 'tree', [2L], 'child', [0L, 1L], 'boy', [0L]])
+            self.assertEqual(r.execute_command('ft.syndump', 'idx'), ['baby', [long(1)], 'offspring', [long(0)], 'wood', [long(2)], 'tree', [long(2)], 'child', [long(0), long(1)], 'boy', [long(0)]])
 
     def testSynonymAddWorngArity(self):
         with self.redis() as r:
@@ -201,7 +201,7 @@ class SynonymsTestCase(BaseModuleTestCase):
                 'ft.create', 'idx', 'schema', 'title', 'text', 'body', 'text'))
             self.assertEqual(r.execute_command('ft.synadd', 'idx', 'boy', 'child', 'offspring'), 0)
             for _ in self.client.retry_with_rdb_reload():
-                self.assertEqual(r.execute_command('ft.syndump', 'idx'), ['offspring', [0L], 'child', [0L], 'boy', [0L]])
+                self.assertEqual(r.execute_command('ft.syndump', 'idx'), ['offspring', [long(0)], 'child', [long(0)], 'boy', [long(0)]])
 
     def testTwoSynonymsSearch(self):
         with self.redis() as r:
@@ -215,7 +215,7 @@ class SynonymsTestCase(BaseModuleTestCase):
 
             res = r.execute_command('ft.search', 'idx', 'offspring offspring', 'EXPANDER', 'SYNONYM')
             # synonyms are applied from the moment they were added, previuse docs are not reindexed
-            self.assertEqual(res, [1L, 'doc1', ['title', 'he is a boy child boy', 'body', 'another test']])
+            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy child boy', 'body', 'another test']])
 
     def testSynonymsIntensiveLoad(self):
         iterations = 1000
@@ -232,4 +232,4 @@ class SynonymsTestCase(BaseModuleTestCase):
             for _ in self.client.retry_with_rdb_reload():
                 for i in range(iterations):
                     res = r.execute_command('ft.search', 'idx', 'child%d' % i, 'EXPANDER', 'SYNONYM')
-                    self.assertEqual(res, [1L, 'doc%d' % i, ['title', 'he is a boy%d' % i, 'body', 'this is a test']])
+                    self.assertEqual(res, [long(1), 'doc%d' % i, ['title', 'he is a boy%d' % i, 'body', 'this is a test']])
