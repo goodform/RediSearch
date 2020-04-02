@@ -240,8 +240,9 @@ RSValueType fieldTypeToValueType(FieldType ft) {
       return RSValue_String;
     case FIELD_GEO:
       // geo is not sortable so we don't care as of now...
-      return RSValue_Null;
+      break;
   }
+  return RSValue_Null;
 }
 
 /**

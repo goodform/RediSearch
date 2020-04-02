@@ -1,2 +1,4 @@
+PYTHON:=python2
+
 test:
-	python -m unittest discover -v
+	$(PYTHON) -m unittest discover -v

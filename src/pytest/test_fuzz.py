@@ -1,9 +1,14 @@
 from rmtest import BaseModuleTestCase
+from redis._compat import xrange
 import redis
 import unittest
 import random
 import time
 
+try:
+    from functools import reduce # only in Python 3
+except:
+    pass
 
 class SearchTestCase(BaseModuleTestCase):
 
