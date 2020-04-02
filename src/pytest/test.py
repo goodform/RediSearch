@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from rmtest import BaseModuleTestCase
+from hotels import hotels
+from redis._compat import (long, xrange)
 import redis
 import unittest
-from hotels import hotels
 import random
 import time
 
@@ -80,17 +81,17 @@ class SearchTestCase(BaseModuleTestCase):
 
         res = self.cmd(
             'ft.search', 'idx', '(@title:(t1 t2) => {$weight: 0.2}) |(@body:(t1 t2) => {$weight: 0.5})', 'nocontent')
-        self.assertListEqual([2L, 'doc2', 'doc1'], res)
+        self.assertListEqual([long(2), 'doc2', 'doc1'], res)
         res = self.cmd(
             'ft.search', 'idx', '(@title:(t1 t2) => {$weight: 2.5}) |(@body:(t1 t2) => {$weight: 0.5})', 'nocontent')
-        self.assertListEqual([2L, 'doc1', 'doc2'], res)
+        self.assertListEqual([long(2), 'doc1', 'doc2'], res)
 
         res = self.cmd(
             'ft.search', 'idx', '(t3 t5) => {$slop: 4}', 'nocontent')
-        self.assertListEqual([2L, 'doc2', 'doc1'], res)
+        self.assertListEqual([long(2), 'doc2', 'doc1'], res)
         res = self.cmd(
             'ft.search', 'idx', '(t5 t3) => {$slop: 0}', 'nocontent')
-        self.assertListEqual([1L, 'doc2'], res)
+        self.assertListEqual([long(1), 'doc2'], res)
         res = self.cmd(
             'ft.search', 'idx', '(t5 t3) => {$slop: 0; $inorder:true}', 'nocontent')
         self.assertListEqual([0], res)
@@ -164,7 +165,7 @@ class SearchTestCase(BaseModuleTestCase):
                 res = r.execute_command('ft.search', 'idx', 'hello')
 
                 self.assertTrue(len(res) == 5)
-                self.assertEqual(res[0], 2L)
+                self.assertEqual(res[0], long(2))
                 self.assertEqual(res[1], "doc2")
                 self.assertTrue(isinstance(res[2], list))
                 self.assertTrue('title' in res[2])
@@ -180,7 +181,7 @@ class SearchTestCase(BaseModuleTestCase):
                 res = r.execute_command(
                     'ft.search', 'idx', 'hello', 'nocontent')
                 self.assertTrue(len(res) == 3)
-                self.assertEqual(res[0], 2L)
+                self.assertEqual(res[0], long(2))
                 self.assertEqual(res[1], "doc2")
                 self.assertEqual(res[2], "doc1")
 
@@ -188,7 +189,7 @@ class SearchTestCase(BaseModuleTestCase):
                 res = r.execute_command(
                     'ft.search', 'idx', 'hello', 'WITHSCORES')
                 self.assertEqual(len(res), 7)
-                self.assertEqual(res[0], 2L)
+                self.assertEqual(res[0], long(2))
                 self.assertEqual(res[1], "doc2")
                 self.assertTrue(float(res[2]) > 0)
                 self.assertEqual(res[4], "doc1")
@@ -198,7 +199,7 @@ class SearchTestCase(BaseModuleTestCase):
                 res = r.execute_command(
                     'ft.search', 'idx', 'hello', 'WITHSCORES', 'NOCONTENT')
                 self.assertEqual(len(res), 5)
-                self.assertEqual(res[0], 2L)
+                self.assertEqual(res[0], long(2))
                 self.assertEqual(res[1], "doc2")
                 self.assertTrue(float(res[2]) > 0)
                 self.assertEqual(res[3], "doc1")
@@ -454,16 +455,16 @@ class SearchTestCase(BaseModuleTestCase):
                                             1.0, 'fields', 'foo', 'hello world werld'))
 
             res = r.execute_command('ft.search', 'idx', 'hello', 'nocontent')
-            self.assertEqual([3L, 'doc3', 'doc2', 'doc1'], res)
+            self.assertEqual([long(3), 'doc3', 'doc2', 'doc1'], res)
             res = r.execute_command(
                 'ft.search', 'idx', 'hello world', 'nocontent', 'scorer', 'DISMAX')
-            self.assertEqual([2L, 'doc3', 'doc2'], res)
+            self.assertEqual([long(2), 'doc3', 'doc2'], res)
             res = r.execute_command(
                 'ft.search', 'idx', 'hello ~world', 'nocontent', 'scorer', 'DISMAX')
-            self.assertEqual([3L, 'doc3', 'doc2', 'doc1'], res)
+            self.assertEqual([long(3), 'doc3', 'doc2', 'doc1'], res)
             res = r.execute_command(
                 'ft.search', 'idx', 'hello ~world ~werld', 'nocontent', 'scorer', 'DISMAX')
-            self.assertEqual([3L, 'doc3', 'doc2', 'doc1'], res)
+            self.assertEqual([long(3), 'doc3', 'doc2', 'doc1'], res)
 
     def testExplain(self):
         with self.redis() as r:
@@ -515,17 +516,17 @@ class SearchTestCase(BaseModuleTestCase):
                                             'foo', 'hello world', 'num', 2, 'extra', 'abba'))
             res = r.execute_command('ft.search', 'idx', 'hello world',
                                     'sortby', 'num', 'asc', 'nocontent', 'withsortkeys')
-            self.assertListEqual([2L, 'doc1', '#1', 'doc2', '#2'], res)
+            self.assertListEqual([long(2), 'doc1', '#1', 'doc2', '#2'], res)
             res = r.execute_command('ft.search', 'idx', 'hello world',
                                     'sortby', 'num', 'desc', 'nocontent', 'withsortkeys')
-            self.assertListEqual([2L, 'doc2', '#2', 'doc1', '#1'], res)
+            self.assertListEqual([long(2), 'doc2', '#2', 'doc1', '#1'], res)
 
             # Updating non indexed fields doesn't affect search results
             self.assertOk(r.execute_command('ft.add', 'idx', 'doc1', '0.1', 'replace', 'partial',
                                             'fields', 'num', 3, 'extra', 'jorem gipsum'))
             res = r.execute_command(
                 'ft.search', 'idx', 'hello world', 'sortby', 'num', 'desc',)
-            self.assertListEqual([2L, 'doc1', ['foo', 'hello world', 'num', '3', 'extra', 'jorem gipsum'],
+            self.assertListEqual([long(2), 'doc1', ['foo', 'hello world', 'num', '3', 'extra', 'jorem gipsum'],
                                   'doc2', ['foo', 'hello world', 'num', '2', 'extra', 'abba']], res)
             res = r.execute_command(
                 'ft.search', 'idx', 'hello', 'nocontent', 'withscores')
@@ -534,15 +535,15 @@ class SearchTestCase(BaseModuleTestCase):
                                             'fields', 'foo', 'wat wet'))
             res = r.execute_command(
                 'ft.search', 'idx', 'hello world', 'nocontent')
-            self.assertListEqual([1L, 'doc2'], res)
+            self.assertListEqual([long(1), 'doc2'], res)
             res = r.execute_command('ft.search', 'idx', 'wat', 'nocontent')
-            self.assertListEqual([1L, 'doc1'], res)
+            self.assertListEqual([long(1), 'doc1'], res)
 
             # Test updating of score and no fields
             res = r.execute_command(
                 'ft.search', 'idx', 'wat', 'nocontent', 'withscores')
             self.assertLess(float(res[2]), 1)
-            # self.assertListEqual([1L, 'doc1'], res)
+            # self.assertListEqual([long(1), 'doc1'], res)
             self.assertOk(r.execute_command('ft.add', 'idx',
                                             'doc1', '1.0', 'replace', 'partial', 'fields'))
             res = r.execute_command(
@@ -642,32 +643,32 @@ class SearchTestCase(BaseModuleTestCase):
 
                 res = r.execute_command(
                     'ft.search', 'idx', 'world', 'nocontent', 'sortby', 'foo')
-                self.assertEqual([100L, 'doc0', 'doc1', 'doc2', 'doc3',
+                self.assertEqual([long(100), 'doc0', 'doc1', 'doc2', 'doc3',
                                   'doc4', 'doc5', 'doc6', 'doc7', 'doc8', 'doc9'], res)
                 res = r.execute_command(
                     'ft.search', 'idx', 'world', 'nocontent', 'sortby', 'foo', 'desc')
-                self.assertEqual([100L, 'doc99', 'doc98', 'doc97', 'doc96',
+                self.assertEqual([long(100), 'doc99', 'doc98', 'doc97', 'doc96',
                                   'doc95', 'doc94', 'doc93', 'doc92', 'doc91', 'doc90'], res)
                 res = r.execute_command(
                     'ft.search', 'idx', 'world', 'nocontent', 'sortby', 'bar', 'desc')
-                self.assertEqual([100L, 'doc0', 'doc1', 'doc2', 'doc3',
+                self.assertEqual([long(100), 'doc0', 'doc1', 'doc2', 'doc3',
                                   'doc4', 'doc5', 'doc6', 'doc7', 'doc8', 'doc9'], res)
                 res = r.execute_command(
                     'ft.search', 'idx', 'world', 'nocontent', 'sortby', 'bar', 'asc')
-                self.assertEqual([100L, 'doc99', 'doc98', 'doc97', 'doc96',
+                self.assertEqual([long(100), 'doc99', 'doc98', 'doc97', 'doc96',
                                   'doc95', 'doc94', 'doc93', 'doc92', 'doc91', 'doc90'], res)
                 res = r.execute_command('ft.search', 'idx', 'world', 'nocontent',
                                         'sortby', 'bar', 'desc', 'withscores', 'limit', '2', '5')
                 self.assertEqual(
-                    [100L, 'doc2', '0', 'doc3', '0', 'doc4', '0', 'doc5', '0', 'doc6', '0'], res)
+                    [long(100), 'doc2', '0', 'doc3', '0', 'doc4', '0', 'doc5', '0', 'doc6', '0'], res)
 
                 res = r.execute_command('ft.search', 'idx', 'world', 'nocontent',
                                         'sortby', 'bar', 'desc', 'withsortkeys', 'limit', 0, 5)
                 self.assertListEqual(
-                    [100L, 'doc0', '#100', 'doc1', '#99', 'doc2', '#98', 'doc3', '#97', 'doc4', '#96'], res)
+                    [long(100), 'doc0', '#100', 'doc1', '#99', 'doc2', '#98', 'doc3', '#97', 'doc4', '#96'], res)
                 res = r.execute_command('ft.search', 'idx', 'world', 'nocontent',
                                         'sortby', 'foo', 'desc', 'withsortkeys', 'limit', 0, 5)
-                self.assertListEqual([100L, 'doc99', '$hello099 world', 'doc98', '$hello098 world', 'doc97', '$hello097 world', 'doc96',
+                self.assertListEqual([long(100), 'doc99', '$hello099 world', 'doc98', '$hello098 world', 'doc97', '$hello097 world', 'doc96',
                                       '$hello096 world', 'doc95', '$hello095 world'], res)
 
     def testNot(self):
@@ -943,8 +944,8 @@ class SearchTestCase(BaseModuleTestCase):
             self.assertEqual(3, len(res))
             self.assertEqual(1, res[0])
             self.assertEqual("doc1", res[1])
-            self.assertListEqual(
-                ['body', 'lorem ipsum', 'price', '2', 'title', 'hello world'], res[2])
+            for element in ['body', 'lorem ipsum', 'price', '2', 'title', 'hello world']:
+                self.assertTrue(element in res[2])
 
             res = r.execute_command(
                 'ft.search', 'idx', "hello werld", "nocontent")
@@ -1248,9 +1249,9 @@ class SearchTestCase(BaseModuleTestCase):
                 self.assertTrue(float(rc[3]) > 0)
 
             rc = r.execute_command("ft.SUGDEL", "ac", "hello world")
-            self.assertEqual(1L, rc)
+            self.assertEqual(long(1), rc)
             rc = r.execute_command("ft.SUGDEL", "ac", "world")
-            self.assertEqual(0L, rc)
+            self.assertEqual(long(0), rc)
 
             rc = r.execute_command("ft.SUGGET", "ac", "hello")
             self.assertEqual(['hello werld'], rc)
@@ -1464,11 +1465,11 @@ class SearchTestCase(BaseModuleTestCase):
                 self.assertEqual(d['index_options'], ['NOFIELDS'])
                 self.assertListEqual(
                     d['fields'], [['title', 'type', 'TEXT', 'WEIGHT', '1']])
-                self.assertEquals(int(d['num_docs']), N)
-                self.assertEquals(int(d['num_terms']), N + 1)
-                self.assertEquals(int(d['max_doc_id']), N)
-                self.assertEquals(int(d['records_per_doc_avg']), 2)
-                self.assertEquals(int(d['num_records']), N * 2)
+                self.assertEqual(int(d['num_docs']), N)
+                self.assertEqual(int(d['num_terms']), N + 1)
+                self.assertEqual(int(d['max_doc_id']), N)
+                self.assertEqual(int(d['records_per_doc_avg']), 2)
+                self.assertEqual(int(d['num_records']), N * 2)
 
                 self.assertGreater(float(d['offset_vectors_sz_mb']), 0)
                 self.assertGreater(float(d['key_table_size_mb']), 0)
@@ -1614,7 +1615,7 @@ class SearchTestCase(BaseModuleTestCase):
                  1.0, 'fields', 'txt', 'Bin match')
         for _ in self.client.retry_with_rdb_reload():
             res = self.cmd('ft.search', 'idx', 'match')
-            self.assertEqual(res, [2L, 'Hello\x00World', [
+            self.assertEqual(res, [long(2), 'Hello\x00World', [
                              'txt', 'Bin match'], 'Hello', ['txt', 'NoBin match']])
 
     def testNonDefaultDb(self):
@@ -1656,7 +1657,7 @@ class SearchTestCase(BaseModuleTestCase):
                 self.cmd('FT.ADDHASH', 'idx', 'newDoc', 1.0)
             except ResponseError as err:
                 caught = True
-                self.assertTrue('twice' in err.message)
+                self.assertTrue('twice' in str(err))
             self.assertTrue(caught)
 
             # Try with REPLACE
@@ -1684,7 +1685,7 @@ class SearchTestCase(BaseModuleTestCase):
         self.cmd('ft.add', 'idx', 'doc1', 1.0, 'fields', 'lastName', 'mark')
         res = self.cmd('ft.search', 'idx', 'mark', 'WITHSORTKEYS', "SORTBY",
                        "firstName", "ASC", "lastName", "DESC", "limit", 0, 100)
-        self.assertEqual([1L, 'doc1', None, ['lastName', 'mark']], res)
+        self.assertEqual([long(1), 'doc1', None, ['lastName', 'mark']], res)
 
     def testLuaAndMulti(self):
         # Ensure we can work in Lua and Multi environments without crashing
@@ -1712,7 +1713,7 @@ class SearchTestCase(BaseModuleTestCase):
         self.cmd('FT.ADD', 'idx', 'doc1', 1.0,
                  'FIELDS', 'language', 'gibberish')
         res = self.cmd('FT.SEARCH', 'idx', 'gibberish')
-        self.assertEqual([1L, 'doc1', ['language', 'gibberish']], res)
+        self.assertEqual([long(1), 'doc1', ['language', 'gibberish']], res)
         # The only way I can verify that LANGUAGE is parsed twice is ensuring we
         # provide a wrong language. This is much easier to test than trying to
         # figure out how a given word is stemmed
@@ -1830,10 +1831,13 @@ class SearchTestCase(BaseModuleTestCase):
 
 def grouper(iterable, n, fillvalue=None):
     "Collect data into fixed-length chunks or blocks"
-    from itertools import izip_longest
+    try:
+        from itertools import zip_longest  # python3
+    except:
+        from itertools import izip_longest as zip_longest   # python2
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
     args = [iter(iterable)] * n
-    return izip_longest(fillvalue=fillvalue, *args)
+    return zip_longest(fillvalue=fillvalue, *args)
 
 def to_dict(r):
     return {r[i]: r[i + 1] for i in range(0, len(r), 2)}

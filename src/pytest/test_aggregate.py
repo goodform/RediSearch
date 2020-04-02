@@ -1,4 +1,5 @@
 from rmtest import BaseModuleTestCase
+from redis._compat import (long, iteritems)
 import redis
 import bz2
 import json
@@ -60,7 +61,7 @@ class AggregateTestCase(BaseModuleTestCase):
 
         res = self.cmd(*cmd)
         self.assertIsNotNone(res)
-        self.assertEqual([292L, ['brand', '', 'count', '1518'], ['brand', 'mad catz', 'count', '43'], [
+        self.assertEqual([long(292), ['brand', '', 'count', '1518'], ['brand', 'mad catz', 'count', '43'], [
                          'brand', 'generic', 'count', '40'], ['brand', 'steelseries', 'count', '37'], ['brand', 'logitech', 'count', '35']], res)
 
     def _testMinMax(self):
@@ -180,7 +181,7 @@ class AggregateTestCase(BaseModuleTestCase):
         for row in self.cmd(*cmd)[1:]:
             self.assertIsInstance(row[5], list)
             self.assertGreater(len(row[5]), 0)
-            self.assertGreaterEqual(row[3], len(row[5]))
+            self.assertGreaterEqual(int(row[3]), len(row[5]))
 
             self.assertLessEqual(len(row[5]), 10)
 
@@ -201,7 +202,7 @@ class AggregateTestCase(BaseModuleTestCase):
 
                'LIMIT', '0', '1']
         res = self.cmd(*cmd)
-        self.assertListEqual([1L, ['dt', '1517417144', 'timefmt', '2018-01-31T16:45:44Z', 'day', '1517356800', 'hour', '1517414400',
+        self.assertListEqual([long(1), ['dt', '1517417144', 'timefmt', '2018-01-31T16:45:44Z', 'day', '1517356800', 'hour', '1517414400',
                                    'minute', '1517417100', 'month', '1514764800', 'dayofweek', '3', 'dayofmonth', '31', 'dayofyear', '30', 'year', '2018']], res)
 
     def _testStringFormat(self):
@@ -228,7 +229,7 @@ class AggregateTestCase(BaseModuleTestCase):
                'LIMIT', '0', '5'
                ]
         res = self.cmd(*cmd)
-        self.assertEqual([292L, ['brand', '', 'count', '1518', 'sum(price)', '44780.69'],
+        self.assertEqual([long(292), ['brand', '', 'count', '1518', 'sum(price)', '44780.69'],
                           ['brand', 'mad catz', 'count',
                               '43', 'sum(price)', '3973.48'],
                           ['brand', 'razer', 'count', '26',
@@ -284,14 +285,14 @@ class AggregateTestCase(BaseModuleTestCase):
                        'REDUCE', 'sum', 1, '@price', 'as', 'price',
                        'SORTBY', 2, '@price', 'desc',
                        'LIMIT', '0', '2')
-        self.assertListEqual([292L, ['brand', '', 'price', '44780.69'], [
+        self.assertListEqual([long(292), ['brand', '', 'price', '44780.69'], [
                              'brand', 'mad catz', 'price', '3973.48']], res)
 
         res = self.cmd('ft.aggregate', 'games', '*', 'GROUPBY', '1', '@brand',
                        'REDUCE', 'sum', 1, '@price', 'as', 'price',
                        'SORTBY', 2, '@price', 'asc',
                        'LIMIT', '0', '2')
-        self.assertListEqual([292L, ['brand', 'myiico', 'price', '0.23'], [
+        self.assertListEqual([long(292), ['brand', 'myiico', 'price', '0.23'], [
                              'brand', 'crystal dynamics', 'price', '0.25']], res)
 
         # Test MAX with limit higher than it
@@ -300,7 +301,7 @@ class AggregateTestCase(BaseModuleTestCase):
                        'SORTBY', 2, '@price', 'asc', 'MAX', 2,
                        'LIMIT', '0', '10')
 
-        self.assertListEqual([292L, ['brand', 'myiico', 'price', '0.23'], [
+        self.assertListEqual([long(292), ['brand', 'myiico', 'price', '0.23'], [
                              'brand', 'crystal dynamics', 'price', '0.25']], res)
 
         # Test Sorting by multiple properties
@@ -309,7 +310,7 @@ class AggregateTestCase(BaseModuleTestCase):
                        'APPLY', '(@price % 10)', 'AS', 'price',
                        'SORTBY', 4, '@price', 'asc', '@brand', 'desc', 'MAX', 10,
                        )
-        self.assertListEqual([292L, ['brand', 'zps', 'price', '0'], ['brand', 'zalman', 'price', '0'], ['brand', 'yoozoo', 'price', '0'], ['brand', 'white label', 'price', '0'], ['brand', 'stinky', 'price', '0'], [
+        self.assertListEqual([long(292), ['brand', 'zps', 'price', '0'], ['brand', 'zalman', 'price', '0'], ['brand', 'yoozoo', 'price', '0'], ['brand', 'white label', 'price', '0'], ['brand', 'stinky', 'price', '0'], [
                              'brand', 'polaroid', 'price', '0'], ['brand', 'plantronics', 'price', '0'], ['brand', 'ozone', 'price', '0'], ['brand', 'oooo', 'price', '0'], ['brand', 'neon', 'price', '0']], res)
 
     def _testExpressions(self):
@@ -320,7 +321,7 @@ class AggregateTestCase(BaseModuleTestCase):
                        'APPLY', 'floor(sqrt(@price)) % 10', 'AS', 'price',
                        'SORTBY', 4, '@price', 'desc', '@brand', 'desc', 'MAX', 5,
                        )
-        self.assertListEqual([2265L, ['brand', 'Xbox', 'price', '9'], ['brand', 'Turtle Beach', 'price', '9'], [
+        self.assertListEqual([long(2265), ['brand', 'Xbox', 'price', '9'], ['brand', 'Turtle Beach', 'price', '9'], [
                              'brand', 'Trust', 'price', '9'], ['brand', 'SteelSeries', 'price', '9'], ['brand', 'Speedlink', 'price', '9']],
                              res)
 
@@ -328,7 +329,7 @@ class AggregateTestCase(BaseModuleTestCase):
         res = self.cmd('ft.aggregate', 'games', '*', 'LOAD', '3', '@brand', '@price', '@nonexist',
                        'LIMIT', 0, 5
                        )
-        self.assertListEqual([1L, ['brand', 'Dark Age Miniatures', 'price', '31.23', 'nonexist', None], ['brand', 'Palladium Books', 'price', '9.55', 'nonexist', None], [
+        self.assertListEqual([long(1), ['brand', 'Dark Age Miniatures', 'price', '31.23', 'nonexist', None], ['brand', 'Palladium Books', 'price', '9.55', 'nonexist', None], [
                              'brand', '', 'price', '0', 'nonexist', None], ['brand', 'Evil Hat Productions', 'price', '15.48', 'nonexist', None], ['brand', 'Fantasy Flight Games', 'price', '33.96', 'nonexist', None]], res)
 
     def _testSplit(self):
@@ -341,7 +342,7 @@ class AggregateTestCase(BaseModuleTestCase):
                        'APPLY', 'split("")', 'AS', 'empty',
                        'LIMIT', '0', '1'
                        )
-        self.assertListEqual([1L, ['strs', ['hello world', 'foo', 'bar'],
+        self.assertListEqual([long(1), ['strs', ['hello world', 'foo', 'bar'],
                                    'strs2', ['hello', 'world', 'foo,,,bar'],
                                    'strs3', ['hello world,  foo,,,bar,'],
                                    'strs4', ['hello world', 'foo', 'bar'],
@@ -357,7 +358,7 @@ class AggregateTestCase(BaseModuleTestCase):
                        'REDUCE', 'FIRST_VALUE', 4, '@price', 'BY', '@price', 'ASC', 'AS', 'bottom_price',
                        'SORTBY', 2, '@top_price', 'DESC', 'MAX', 5
                        )
-        self.assertListEqual([4L, ['brand', 'sony', 'top_item', 'sony psp slim &amp; lite 2000 console', 'top_price', '695.8', 'bottom_item', 'sony dlchd20p high speed hdmi cable for playstation 3', 'bottom_price', '5.88'],
+        self.assertListEqual([long(4), ['brand', 'sony', 'top_item', 'sony psp slim &amp; lite 2000 console', 'top_price', '695.8', 'bottom_item', 'sony dlchd20p high speed hdmi cable for playstation 3', 'bottom_price', '5.88'],
                               ['brand', 'matias', 'top_item', 'matias halfkeyboard usb', 'top_price',
                                   '559.99', 'bottom_item', 'matias halfkeyboard usb', 'bottom_price', '559.99'],
                               ['brand', 'beyerdynamic', 'top_item', 'beyerdynamic mmx300 pc gaming premium digital headset with microphone', 'top_price', '359.74',
@@ -394,15 +395,14 @@ class AggregateTestCase(BaseModuleTestCase):
                      'LIMIT', '0', '5',
                      'LOAD', 1, '@brand')
 
-    def testAll(self):
 
-        for name, f in self.__class__.__dict__.iteritems():
+    def testAll(self):
+        for name, f in iteritems(self.__class__.__dict__):
             if name.startswith('_test'):
                 f(self)
                 sys.stdout.write('Aggregate.{} ... '.format(f.__name__[1:]))
                 sys.stdout.flush()
                 print('ok')
-
 
 if __name__ == '__main__':
 
