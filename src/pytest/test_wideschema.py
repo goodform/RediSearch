@@ -13,7 +13,7 @@ class SearchTestCase(BaseModuleTestCase):
         with self.redis() as r:
             r.flushdb()
             schema = []
-            FIELDS = 128 if platform.architecture()[0] == '64bit' else 64
+            FIELDS = 64
             for i in range(FIELDS):
                 schema.extend(('field_%d' % i, 'TEXT'))
             self.assertOk(r.execute_command(

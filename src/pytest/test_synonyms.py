@@ -2,7 +2,6 @@ from rmtest import BaseModuleTestCase
 import redis
 import unittest
 from hotels import hotels
-from redis._compat import long
 import random
 import time
 
@@ -20,7 +19,7 @@ class SynonymsTestCase(BaseModuleTestCase):
                                             'body', 'this is a test'))
 
             res = r.execute_command('ft.search', 'idx', 'child', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [int(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
 
     def testTermOnTwoSynonymsGroup(self):
         with self.redis() as r:
@@ -35,9 +34,9 @@ class SynonymsTestCase(BaseModuleTestCase):
                                             'body', 'this is a test'))
 
             res = r.execute_command('ft.search', 'idx', 'child', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [int(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
             res = r.execute_command('ft.search', 'idx', 'offspring', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [int(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
 
     def testSynonymGroupWithThreeSynonyms(self):
         with self.redis() as r:
@@ -51,9 +50,9 @@ class SynonymsTestCase(BaseModuleTestCase):
                                             'body', 'this is a test'))
 
             res = r.execute_command('ft.search', 'idx', 'child', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [int(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
             res = r.execute_command('ft.search', 'idx', 'offspring', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [int(1), 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
 
     def testSynonymWithMultipleDocs(self):
         with self.redis() as r:
@@ -71,7 +70,7 @@ class SynonymsTestCase(BaseModuleTestCase):
                                             'body', 'the child sister'))
 
             res = r.execute_command('ft.search', 'idx', 'offspring', 'EXPANDER', 'SYNONYM')
-            self.assertEqual(res, [long(2), 'doc2', ['title', 'she is a girl', 'body', 'the child sister'], 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
+            self.assertEqual(res, [int(2), 'doc2', ['title', 'she is a girl', 'body', 'the child sister'], 'doc1', ['title', 'he is a boy', 'body', 'this is a test']])
 
     def testSynonymUpdate(self):
         with self.redis() as r:
@@ -91,7 +90,7 @@ class SynonymsTestCase(BaseModuleTestCase):
 
             res = r.execute_command('ft.search', 'idx', 'child', 'EXPANDER', 'SYNONYM')
             # synonyms are applied from the moment they were added, previuse docs are not reindexed
-            self.assertEqual(res, [long(1), 'doc2', ['title', 'he is another baby', 'body', 'another test']])
+            self.assertEqual(res, [int(1), 'doc2', ['title', 'he is another baby', 'body', 'another test']])
 
     def testSynonymDump(self):
         with self.redis() as r:
@@ -101,9 +100,9 @@ class SynonymsTestCase(BaseModuleTestCase):
             self.assertEqual(r.execute_command('ft.synadd', 'idx', 'boy', 'child', 'offspring'), 0)
             self.assertEqual(r.execute_command('ft.synadd', 'idx', 'baby', 'child'), 1)
             self.assertEqual(r.execute_command('ft.synadd', 'idx', 'tree', 'wood'), 2)
-            self.assertEqual(r.execute_command('ft.syndump', 'idx'), ['baby', [long(1)], 'offspring', [long(0)], 'wood', [long(2)], 'tree', [long(2)], 'child', [long(0), long(1)], 'boy', [long(0)]])
+            self.assertEqual(r.execute_command('ft.syndump', 'idx'), ['baby', [int(1)], 'offspring', [int(0)], 'wood', [int(2)], 'tree', [int(2)], 'child', [int(0), int(1)], 'boy', [int(0)]])
 
-    def testSynonymAddWorngArity(self):
+    def testSynonymAddWrongArity(self):
         with self.redis() as r:
             r.flushdb()
             self.assertOk(r.execute_command(
@@ -112,7 +111,7 @@ class SynonymsTestCase(BaseModuleTestCase):
             try:
                 r.execute_command('ft.synadd', 'idx')
             except Exception as e:
-                exceptionStr = str(e)
+                exceptionStr = str(e).lower()
             self.assertEqual(exceptionStr, 'wrong number of arguments for \'ft.synadd\' command')
 
     def testSynonymAddUnknownIndex(self):
@@ -122,10 +121,10 @@ class SynonymsTestCase(BaseModuleTestCase):
             try:
                 r.execute_command('ft.synadd', 'idx', 'boy', 'child')
             except Exception as e:
-                exceptionStr = str(e)
-            self.assertEqual(exceptionStr, 'Unknown index name')
+                exceptionStr = str(e).lower()
+            self.assertEqual(exceptionStr, 'unknown index name')
 
-    def testSynonymUpdateWorngArity(self):
+    def testSynonymUpdateWrongArity(self):
         with self.redis() as r:
             r.flushdb()
             self.assertOk(r.execute_command(
@@ -135,7 +134,7 @@ class SynonymsTestCase(BaseModuleTestCase):
             try:
                 r.execute_command('ft.synupdate', 'idx', '0')
             except Exception as e:
-                exceptionStr = str(e)
+                exceptionStr = str(e).lower()
             self.assertEqual(exceptionStr, 'wrong number of arguments for \'ft.synupdate\' command')
 
     def testSynonymUpdateUnknownIndex(self):
@@ -145,8 +144,8 @@ class SynonymsTestCase(BaseModuleTestCase):
             try:
                 r.execute_command('ft.synupdate', 'idx', '0', 'child')
             except Exception as e:
-                exceptionStr = str(e)
-            self.assertEqual(exceptionStr, 'Unknown index name')
+                exceptionStr = str(e).lower()
+            self.assertEqual(exceptionStr, 'unknown index name')
 
     def testSynonymUpdateNotNumberId(self):
         with self.redis() as r:
@@ -155,7 +154,7 @@ class SynonymsTestCase(BaseModuleTestCase):
             try:
                 r.execute_command('ft.synupdate', 'idx', 'test', 'child')
             except Exception as e:
-                exceptionStr = str(e)
+                exceptionStr = str(e).lower()
             self.assertEqual(exceptionStr, 'wrong parameters, id is not an integer')
 
     def testSynonymUpdateOutOfRangeId(self):
@@ -168,10 +167,10 @@ class SynonymsTestCase(BaseModuleTestCase):
             try:
                 r.execute_command('ft.synupdate', 'idx', '1', 'child')
             except Exception as e:
-                exceptionStr = str(e)
+                exceptionStr = str(e).lower()
             self.assertEqual(exceptionStr, 'given id does not exists')
 
-    def testSynonymDumpWorngArity(self):
+    def testSynonymDumpWrongArity(self):
         with self.redis() as r:
             r.flushdb()
             self.assertOk(r.execute_command(
@@ -181,7 +180,7 @@ class SynonymsTestCase(BaseModuleTestCase):
             try:
                 r.execute_command('ft.syndump')
             except Exception as e:
-                exceptionStr = str(e)
+                exceptionStr = str(e).lower()
             self.assertEqual(exceptionStr, 'wrong number of arguments for \'ft.syndump\' command')
 
     def testSynonymUnknownIndex(self):
@@ -191,8 +190,8 @@ class SynonymsTestCase(BaseModuleTestCase):
             try:
                 r.execute_command('ft.syndump', 'idx')
             except Exception as e:
-                exceptionStr = str(e)
-            self.assertEqual(exceptionStr, 'Unknown index name')
+                exceptionStr = str(e).lower()
+            self.assertEqual(exceptionStr, 'unknown index name')
 
     def testSynonymsRdb(self):
         with self.redis() as r:
@@ -201,7 +200,7 @@ class SynonymsTestCase(BaseModuleTestCase):
                 'ft.create', 'idx', 'schema', 'title', 'text', 'body', 'text'))
             self.assertEqual(r.execute_command('ft.synadd', 'idx', 'boy', 'child', 'offspring'), 0)
             for _ in self.client.retry_with_rdb_reload():
-                self.assertEqual(r.execute_command('ft.syndump', 'idx'), ['offspring', [long(0)], 'child', [long(0)], 'boy', [long(0)]])
+                self.assertEqual(r.execute_command('ft.syndump', 'idx'), ['offspring', [int(0)], 'child', [int(0)], 'boy', [int(0)]])
 
     def testTwoSynonymsSearch(self):
         with self.redis() as r:
@@ -215,7 +214,7 @@ class SynonymsTestCase(BaseModuleTestCase):
 
             res = r.execute_command('ft.search', 'idx', 'offspring offspring', 'EXPANDER', 'SYNONYM')
             # synonyms are applied from the moment they were added, previuse docs are not reindexed
-            self.assertEqual(res, [long(1), 'doc1', ['title', 'he is a boy child boy', 'body', 'another test']])
+            self.assertEqual(res, [int(1), 'doc1', ['title', 'he is a boy child boy', 'body', 'another test']])
 
     def testSynonymsIntensiveLoad(self):
         iterations = 1000
@@ -223,13 +222,13 @@ class SynonymsTestCase(BaseModuleTestCase):
             r.flushdb()
             self.assertOk(r.execute_command(
                 'ft.create', 'idx', 'schema', 'title', 'text', 'body', 'text'))
-            for i in range(iterations):
+            for i in list(range(iterations)):
                 self.assertEqual(r.execute_command('ft.synadd', 'idx', 'boy%d' % i, 'child%d' % i, 'offspring%d' % i), i)
-            for i in range(iterations):
+            for i in list(range(iterations)):
                 self.assertOk(r.execute_command('ft.add', 'idx', 'doc%d' % i, 1.0, 'fields',
                                                 'title', 'he is a boy%d' % i,
                                                 'body', 'this is a test'))
             for _ in self.client.retry_with_rdb_reload():
-                for i in range(iterations):
+                for i in list(range(iterations)):
                     res = r.execute_command('ft.search', 'idx', 'child%d' % i, 'EXPANDER', 'SYNONYM')
-                    self.assertEqual(res, [long(1), 'doc%d' % i, ['title', 'he is a boy%d' % i, 'body', 'this is a test']])
+                    self.assertEqual(res, [int(1), 'doc%d' % i, ['title', 'he is a boy%d' % i, 'body', 'this is a test']])

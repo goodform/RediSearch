@@ -1,5 +1,4 @@
 from rmtest import BaseModuleTestCase
-from redis._compat import (long, safe_unicode)
 import unittest
 import os.path
 
@@ -42,20 +41,20 @@ class SummarizeTestCase(BaseModuleTestCase):
                        'SUMMARIZE', 'FIELDS', 1, 'txt',
                        'SEPARATOR', '\r\n',
                        'FRAGS', 4, 'LEN', 3)
-        res[2] = [safe_unicode(x) for x in res[2]]
-        self.assertEqual([long(1), u'gen1', [
+        res[2] = [str(x) for x in res[2]]
+        self.assertEqual([int(1), u'gen1', [
                          u'txt', u'name Isaac: and\r\nwith Isaac,\r\nIsaac. {21:4} And Abraham circumcised his son Isaac\r\nson Isaac was\r\n']], res)
 
         # Attempt a query which doesn't have a corresponding matched term
         res = self.cmd('FT.SEARCH', 'idx', '-blah', 'SUMMARIZE', 'LEN', 3)
-        self.assertEqual(long(1), res[0])
+        self.assertEqual(int(1), res[0])
         self.assertEqual('gen1', res[1])
-        res[2] = [safe_unicode(x) for x in res[2]]
+        res[2] = [str(x) for x in res[2]]
         self.assertTrue(u'The First Book of Moses, called Genesis {1:1}' in res[2][1])
 
         # Try the same, but attempting to highlight
         res = self.cmd('FT.SEARCH', 'idx', '-blah', 'HIGHLIGHT')
-        res[2] = [safe_unicode(x) for x in res[2]]
+        res[2] = [str(x) for x in res[2]]
         self.assertTrue(215000 >= len(res[2][1]) >= 211000)
 
     def testPrefixExpansion(self):
@@ -64,13 +63,13 @@ class SummarizeTestCase(BaseModuleTestCase):
         res = self.cmd('FT.SEARCH', 'idx', 'begi*',
                        'HIGHLIGHT', 'FIELDS', 1, 'txt', 'TAGS', '<b>', '</b>',
                        'SUMMARIZE', 'FIELDS', 1, 'txt', 'LEN', 20)
-        res[2] = [safe_unicode(x) for x in res[2]]
+        res[2] = [str(x) for x in res[2]]
 
         # Prefix expansion uses "early exit" strategy, so the term highlighted won't necessarily be the
         # best term
-        self.assertEqual([long(1), 'gen1', [
+        self.assertEqual([int(1), 'gen1', [
                          u'txt', 'is] one, and they have all one language; and this they <b>begin</b> to do: and now nothing will be restrained from them, which... ']], res)
-        # self.assertEqual([long(1), 'gen1', ['txt', 'First Book of Moses, called Genesis {1:1} In the <b>beginning</b> God created the heaven and the earth. {1:2} And the earth... the mighty hunter before the LORD. {10:10} And the <b>beginning</b> of his kingdom was Babel, and Erech, and Accad, and Calneh... is] one, and they have all one language; and this they <b>begin</b> to do: and now nothing will be restrained from them, which... ']], res)
+        # self.assertEqual([int(1), 'gen1', ['txt', 'First Book of Moses, called Genesis {1:1} In the <b>beginning</b> God created the heaven and the earth. {1:2} And the earth... the mighty hunter before the LORD. {10:10} And the <b>beginning</b> of his kingdom was Babel, and Erech, and Accad, and Calneh... is] one, and they have all one language; and this they <b>begin</b> to do: and now nothing will be restrained from them, which... ']], res)
 
     def testSummarizationMultiField(self):
         p1 = "Redis is an open-source in-memory database project implementing a networked, in-memory key-value store with optional durability. Redis supports different kinds of abstract data structures, such as strings, lists, maps, sets, sorted sets, hyperloglogs, bitmaps and spatial indexes. The project is mainly developed by Salvatore Sanfilippo and is currently sponsored by Redis Labs.[4] Redis Labs creates and maintains the official Redis Enterprise Pack."
@@ -90,9 +89,9 @@ class SummarizeTestCase(BaseModuleTestCase):
         res = self.cmd('FT.SEARCH', 'idx', 'memory persistence salvatore',
                        'SUMMARIZE', 'FIELDS', 2, 'txt1', 'txt2', 'LEN', 5)
         # print res
-        self.assertEqual(long(1), res[0])
+        self.assertEqual(int(1), res[0])
         self.assertEqual('redis', res[1])
-        res[2] = [safe_unicode(x) for x in res[2]]
+        res[2] = [str(x) for x in res[2]]
         self.assertTrue(u'txt1' in res[2])
         self.assertTrue(u'memory database project implementing a networked, in-memory ... by Salvatore Sanfilippo... ' in res[2])
         self.assertTrue(u'txt2' in res[2])
@@ -118,7 +117,7 @@ class SummarizeTestCase(BaseModuleTestCase):
         res = self.cmd('FT.SEARCH', 'idx', 'hello',
                        'SUMMARIZE', 'RETURN', 1, 'body')
         # print res
-        self.assertEqual([long(1), 'doc', ['body', None]], res)
+        self.assertEqual([int(1), 'doc', ['body', None]], res)
 
     def testSummarizationMeta(self):
         self.cmd('ft.create', 'idx', 'schema', 'foo',
@@ -138,7 +137,7 @@ class SummarizeTestCase(BaseModuleTestCase):
 
         res = self.cmd('ft.search', 'idx', 'pill pillow piller',
                        'RETURN', 3, 'foo', 'bar', 'baz', 'SUMMARIZE')
-        self.assertEqual([long(1), 'doc1', ['foo', 'pill... ', 'bar',
+        self.assertEqual([int(1), 'doc1', ['foo', 'pill... ', 'bar',
                                        'pillow... ', 'baz', 'piller... ']], res)
 
 
@@ -150,9 +149,9 @@ class SummarizeTestCase(BaseModuleTestCase):
             "Parents strongly cautioned. May be unsuitable for children ages 14 and under.",
             "description", "90", "year", "2017", "uscore", "91", "usize", "80")
         res = self.cmd('ft.search', 'netflix', 'vampire', 'highlight')
-        self.assertTrue(res[0] == long(1))
+        self.assertTrue(res[0] == int(1))
         self.assertTrue(res[1] == u'15ad80086ccc7f')
-        res[2] = [safe_unicode(x) for x in res[2]]
+        res[2] = [str(x) for x in res[2]]
         self.assertTrue(u'The <b>Vampire</b> Diaries' in res[2])
 
 def grouper(iterable, n, fillvalue=None):

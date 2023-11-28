@@ -1,7 +1,6 @@
 import math
 import unittest
 from rmtest import BaseModuleTestCase
-from redis._compat import long
 
 
 class ScorersTestCase(BaseModuleTestCase):
@@ -49,25 +48,25 @@ class ScorersTestCase(BaseModuleTestCase):
                 self.assertOk(r.execute_command('ft.add', 'idx', 'doc%d' % n, sc, 'fields',
                                                 'title', 'hello world ' * n, 'body', 'lorem ipsum ' * n))
             results = [
-                [long(24), 'doc1', 1.97, 'doc2', 1.94, 'doc3',
+                [int(24), 'doc1', 1.97, 'doc2', 1.94, 'doc3',
                     1.91, 'doc4', 1.88, 'doc5', 1.85],
-                [long(24), 'doc1', 0.9, 'doc2', 0.59, 'doc3',
+                [int(24), 'doc1', 0.9, 'doc2', 0.59, 'doc3',
                     0.43, 'doc4', 0.34, 'doc5', 0.28],
-                [long(24), 'doc4', 1.75, 'doc5', 1.75, 'doc3',
+                [int(24), 'doc4', 1.75, 'doc5', 1.75, 'doc3',
                     1.74, 'doc6', 1.74, 'doc7', 1.72],
-                [long(24), 'doc24', 480.0, 'doc23', 460.0, 'doc22',
+                [int(24), 'doc24', 480.0, 'doc23', 460.0, 'doc22',
                     440.0, 'doc21', 420.0, 'doc20', 400.0],
-                [long(24), 'doc1', 0.99, 'doc2', 0.97, 'doc3',
+                [int(24), 'doc1', 0.99, 'doc2', 0.97, 'doc3',
                     0.96, 'doc4', 0.94, 'doc5', 0.93],
-                [long(24), 'doc1', 1.97, 'doc2', 1.94, 'doc3',
+                [int(24), 'doc1', 1.97, 'doc2', 1.94, 'doc3',
                     1.91, 'doc4', 1.88, 'doc5', 1.85],
-                [long(24), 'doc1', 0.9, 'doc2', 0.59, 'doc3',
+                [int(24), 'doc1', 0.9, 'doc2', 0.59, 'doc3',
                     0.43, 'doc4', 0.34, 'doc5', 0.28],
-                [long(24), 'doc4', 1.75, 'doc5', 1.75, 'doc3',
+                [int(24), 'doc4', 1.75, 'doc5', 1.75, 'doc3',
                     1.74, 'doc6', 1.74, 'doc7', 1.72],
-                [long(24), 'doc24', 480.0, 'doc23', 460.0, 'doc22',
+                [int(24), 'doc24', 480.0, 'doc23', 460.0, 'doc22',
                     440.0, 'doc21', 420.0, 'doc20', 400.0],
-                [long(24), 'doc1', 0.99, 'doc2', 0.97, 'doc3',
+                [int(24), 'doc1', 0.99, 'doc2', 0.97, 'doc3',
                     0.96, 'doc4', 0.94, 'doc5', 0.93]
             ]
 

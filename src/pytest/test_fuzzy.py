@@ -1,5 +1,4 @@
 from rmtest import BaseModuleTestCase
-from redis._compat import long
 import redis
 import unittest
 from hotels import hotels
@@ -18,13 +17,13 @@ class FuzzyTestCase(BaseModuleTestCase):
                                             'body', 'this is a test'))
 
             res = r.execute_command('ft.search', 'idx', '%word%')
-            self.assertEqual(res, [long(1), 'doc1', ['title', 'hello world', 'body', 'this is a test']])
+            self.assertEqual(res, [int(1), 'doc1', ['title', 'hello world', 'body', 'this is a test']])
     
     def testLdLimit(self):
         self.cmd('ft.create', 'idx', 'schema', 'title', 'text', 'body', 'text')
         self.cmd('ft.add', 'idx', 'doc1', 1.0, 'fields', 'title', 'hello world')
-        self.assertEqual([long(1), 'doc1', ['title', 'hello world']], self.cmd('ft.search', 'idx', '%word%'))  # should be ok
-        self.assertEqual([long(0)], self.cmd('ft.search', 'idx', r'%sword%'))  # should return nothing
+        self.assertEqual([int(1), 'doc1', ['title', 'hello world']], self.cmd('ft.search', 'idx', '%word%'))  # should be ok
+        self.assertEqual([int(0)], self.cmd('ft.search', 'idx', r'%sword%'))  # should return nothing
     
     def testFuzzyMultipleResults(self):
         with self.redis() as r:
@@ -46,7 +45,7 @@ class FuzzyTestCase(BaseModuleTestCase):
 
 
             res = r.execute_command('ft.search', 'idx', '%word%')
-            self.assertEqual(res, [long(3), 'doc3', ['title', 'hello ward', 'body', 'this is a test'], 'doc2', ['title', 'hello word', 'body', 'this is a test'], 'doc1', ['title', 'hello world', 'body', 'this is a test']])
+            self.assertEqual(res, [int(3), 'doc3', ['title', 'hello ward', 'body', 'this is a test'], 'doc2', ['title', 'hello word', 'body', 'this is a test'], 'doc1', ['title', 'hello world', 'body', 'this is a test']])
 
     
     def testFuzzySyntaxError(self):

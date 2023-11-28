@@ -1,5 +1,4 @@
 from rmtest import BaseModuleTestCase
-from redis._compat import xrange
 import redis
 import unittest
 import random
@@ -44,7 +43,7 @@ class SearchTestCase(BaseModuleTestCase):
         self.assertOk(r.execute_command(
             'ft.create', 'idx', 'schema', 'txt', 'text'))
 
-        for i in xrange(1000):
+        for i in range(1000):
             did, tokens = self.generate_random_doc()
 
             r.execute_command('ft.add', 'idx', did,
